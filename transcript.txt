@@ -1,0 +1,22 @@
+$ pnpm build && node demo.mjs
+1. Request the patch review once, naming three findings.
+   the server re-verifies: a1 (request 1 of 3), a2 (request 2 of 3)
+
+2. Wait 200 ms. The review is still running.
+   review status: TIMED_OUT
+   a1  PENDING            request 1 of 3
+   a2  PENDING            request 2 of 3
+   a3  PENDING            no request  (the review lists no re-verification of this finding)
+
+3. The review settles. Wait again for the same review ID.
+   review status: COMPLETED
+   a1  RESOLVED_VERIFIED  request 1 of 3
+   a2  STILL_PRESENT      request 2 of 3
+   a3  NOT_VERIFIED       no request  (the review lists no re-verification of this finding)
+
+4. The same settled review, read by hand for a3.
+   list.filter(a3).every(resolved)            -> true
+   list.find(a3)?.outcome !== "STILL_PRESENT" -> true
+   waitForLocalReverification                 -> NOT_VERIFIED
+
+5. Patch review requests the stand-in received: 1
